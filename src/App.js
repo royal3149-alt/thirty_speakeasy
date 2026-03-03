@@ -226,13 +226,13 @@ const Card = ({ children, onClick, selected, className = "" }) => (
     onClick={onClick}
     className={`relative p-6 cursor-pointer transition-all border ${
       selected
-        ? "bg-[#2a0e0e] border-[#e5d5b0]"
+        ? "bg-[#2a0e0e] border-[#e5d5b0] shadow-lg"
         : "bg-[#1a1a1a] border-[#333] hover:border-[#5c4033]"
     } ${className}`}
   >
     {children}
     {selected && (
-      <div className="absolute top-2 right-2 text-[#e5d5b0] animate-in fade-in zoom-in">
+      <div className="absolute top-2 right-2 text-[#e5d5b0] animate-in fade-in zoom-in duration-300">
         <Check size={16} />
       </div>
     )}
@@ -243,23 +243,15 @@ const Card = ({ children, onClick, selected, className = "" }) => (
 
 const LandingPage = ({ onStart, onSkip, savedUser, onLogoClick }) => {
   const [showConfirm, setShowConfirm] = useState(false);
-
-  // 智慧跳過
-  const handleSkipClick = () => {
-    if (savedUser) {
-      onSkip();
-    } else {
-      setShowConfirm(true);
-    }
-  };
+  const handleSkipClick = () => (savedUser ? onSkip() : setShowConfirm(true));
 
   return (
     <div className="h-full flex flex-col items-center justify-center text-center px-6 animate-fade-in relative z-10">
       <div
-        className="mb-12 flex flex-col items-center cursor-default"
+        className="mb-12 relative group cursor-pointer flex flex-col items-center"
         onClick={onLogoClick}
       >
-        <div className="w-[1px] h-20 bg-[#4a0404] mb-6"></div>
+        <div className="w-[1px] h-24 bg-gradient-to-b from-transparent via-[#4a0404] to-[#4a0404] mx-auto mb-6 group-hover:h-28 group-hover:bg-[#e5d5b0] transition-all duration-700 ease-in-out"></div>
         {savedUser ? (
           <div>
             <p className="text-[#8a6a57] text-xs tracking-widest mb-2 font-serif uppercase">
@@ -271,7 +263,7 @@ const LandingPage = ({ onStart, onSkip, savedUser, onLogoClick }) => {
           </div>
         ) : (
           <div>
-            <h1 className="text-4xl md:text-6xl font-serif text-[#e5d5b0] tracking-widest mb-3 uppercase">
+            <h1 className="text-4xl md:text-6xl font-serif text-[#e5d5b0] tracking-widest mb-3 uppercase font-bold">
               三拾酒館
             </h1>
             <p className="text-[#8a6a57] font-serif italic text-sm tracking-[0.3em] uppercase">
@@ -319,7 +311,7 @@ const LandingPage = ({ onStart, onSkip, savedUser, onLogoClick }) => {
               <span className="text-white font-bold border-b border-[#4a0404]">
                 「Thirty Talk」
               </span>{" "}
-              遊戲的機會。我們將無法為您調製專屬風味。
+              遊戲的機會。
             </p>
             <div className="flex flex-col gap-3">
               <Button onClick={onStart}>返回測驗 (推薦)</Button>
@@ -366,7 +358,7 @@ const QuizPage = ({ onAnswerComplete, currentAnswers }) => {
             </span>
             <span className="text-sm"> / 0{VIBE_QUESTIONS.length}</span>
           </div>
-          <span className="text-[#555] text-xs tracking-widest uppercase font-mono tracking-[0.2em]">
+          <span className="text-[#555] text-xs tracking-widest uppercase font-mono">
             Soul Archive
           </span>
         </div>
@@ -449,6 +441,7 @@ const BookingPage = ({ onSubmit, availability, isSubmitting, savedUser }) => {
     guests: 2,
     note: "",
     host: "",
+    needsFood: false,
   });
 
   const openDates = Object.keys(availability).sort();
@@ -570,15 +563,49 @@ const BookingPage = ({ onSubmit, availability, isSubmitting, savedUser }) => {
           </div>
 
           <div>
-            <label className="text-[#8a6a57] text-[10px] block mb-2 uppercase tracking-widest font-bold">
+            <label className="text-[#8a6a57] text-[10px] block mb-2 uppercase tracking-widest font-bold font-serif">
               Guests
             </label>
             <input
               type="number"
               value={data.guests}
-              className="w-full bg-black border border-[#333] text-white p-3 outline-none focus:border-[#4a0404]"
+              className="w-full bg-black border border-[#333] text-[#e5d5b0] p-3 outline-none focus:border-[#4a0404] font-serif"
               onChange={(e) => setData({ ...data, guests: e.target.value })}
             />
+          </div>
+
+          {/* ★ 新增：私廚餐食預訂開關 ★ */}
+          <div className="mt-2 border border-[#333] p-4 bg-[#0a0a0a] transition-all hover:border-[#5c4033] rounded-sm">
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <div className="relative flex items-center justify-center mt-0.5">
+                <input
+                  type="checkbox"
+                  className="peer sr-only"
+                  checked={data.needsFood}
+                  onChange={(e) =>
+                    setData({ ...data, needsFood: e.target.checked })
+                  }
+                />
+                <div className="w-4 h-4 border border-[#5c4033] rounded-sm peer-checked:bg-[#4a0404] peer-checked:border-[#4a0404] transition-all"></div>
+                {data.needsFood && (
+                  <Check
+                    size={12}
+                    className="absolute text-[#e5d5b0] pointer-events-none"
+                  />
+                )}
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[#e5d5b0] text-sm font-serif group-hover:text-white transition-colors">
+                  預訂私廚餐食 (Secret Menu)
+                </span>
+                {data.needsFood && (
+                  <span className="text-[#a89f91] text-xs mt-3 leading-relaxed animate-fade-in border-t border-[#333] pt-3">
+                    我們的餐食依當週心情準備:)。預約完成後，請於 IG
+                    私訊索取地標時，一併了解專屬菜單。
+                  </span>
+                )}
+              </div>
+            </label>
           </div>
         </div>
 
@@ -590,18 +617,18 @@ const BookingPage = ({ onSubmit, availability, isSubmitting, savedUser }) => {
             <input
               placeholder="Your Name"
               value={data.name}
-              className="w-full bg-transparent border-b border-[#333] py-3 text-white outline-none focus:border-[#4a0404] font-serif placeholder-zinc-700"
+              className="w-full bg-transparent border-b border-[#333] py-3 text-[#e5d5b0] outline-none focus:border-[#4a0404] font-serif placeholder-zinc-700"
               onChange={(e) => setData({ ...data, name: e.target.value })}
             />
             <input
               placeholder="IG / Line ID"
               value={data.contact}
-              className="w-full bg-transparent border-b border-[#333] py-3 text-white outline-none focus:border-[#4a0404] font-serif placeholder-zinc-700"
+              className="w-full bg-transparent border-b border-[#333] py-3 text-[#e5d5b0] outline-none focus:border-[#4a0404] font-serif placeholder-zinc-700"
               onChange={(e) => setData({ ...data, contact: e.target.value })}
             />
             <textarea
               placeholder="Whispers..."
-              className="w-full bg-black/40 border border-[#333] p-4 text-white h-24 mt-4 outline-none focus:border-[#4a0404] font-serif placeholder-zinc-700 resize-none"
+              className="w-full bg-black/40 border border-[#333] p-4 text-[#e5d5b0] h-24 mt-4 outline-none focus:border-[#4a0404] font-serif placeholder-zinc-700 resize-none"
               onChange={(e) => setData({ ...data, note: e.target.value })}
             />
           </div>
@@ -624,54 +651,50 @@ const BookingPage = ({ onSubmit, availability, isSubmitting, savedUser }) => {
   );
 };
 
-// ★ SuccessPage：回復「雜誌封面式」排版（無黑膠囊） ★
 const SuccessPage = ({ data, quizResult, onReplay, onHome }) => {
   const IG_URL =
     "https://www.instagram.com/30_speakeasy?igsh=MTRrZGZnbHBxbG42bw%3D%3D&utm_source=qr";
 
-  // 強制 Fallback，確保有卡片
-  let persona = {
-    zh: "神秘旅人",
-    en: "THE MYSTERY",
-    quote: "你保留了靈魂的秘密，準備在今晚親自揭曉。",
-    kw: "#未知 #期待",
-    img: "https://i.ibb.co/JW22yLfJ/IMG-5297.jpg",
+  const PERSONA_DATA = {
+    bar: {
+      zh: "話題領航員",
+      en: "THE NAVIGATOR",
+      quote: "你掌握著夜晚的航向，與調酒師的對話是你探索未知的羅盤。",
+      kw: "#連結 #探索",
+      img: "https://i.ibb.co/zWm6BGxT/IMG-5301.jpg",
+    },
+    lounge: {
+      zh: "微醺引力點",
+      en: "THE MAGNET",
+      quote: "你就是夜晚的引力中心，吸引著頻率相同的靈魂。",
+      kw: "#交流 #吸引",
+      img: "https://i.ibb.co/S4tNyR2d/IMG-5303.jpg",
+    },
+    table: {
+      zh: "城市漫遊者",
+      en: "THE DRIFTER",
+      quote: "不被座位束縛，你的雷達隨時開啟，準備在人海中捕捉訊號。",
+      kw: "#流動 #觀察",
+      img: "https://i.ibb.co/0yNSCz9p/IMG-5300.jpg",
+    },
+    anywhere: {
+      zh: "頻率共振者",
+      en: "THE RESONATOR",
+      quote: "座位只是形式。只要音樂對了，整個空間都是你的主場。",
+      kw: "#直覺 #氛圍",
+      img: "https://i.ibb.co/5XZnpVbs/IMG-5299.jpg",
+    },
+    default: {
+      zh: "神秘旅人",
+      en: "THE MYSTERY",
+      quote: "你保留了靈魂的秘密，準備在今晚親自揭曉。",
+      kw: "#未知 #期待",
+      img: "https://i.ibb.co/JW22yLfJ/IMG-5297.jpg",
+    },
   };
 
-  if (quizResult && quizResult.seat) {
-    if (quizResult.seat === "bar")
-      persona = {
-        zh: "話題領航員",
-        en: "THE NAVIGATOR",
-        quote: "你掌握著夜晚的航向，與調酒師的對話是你探索未知的羅盤。",
-        kw: "#連結 #探索",
-        img: "https://i.ibb.co/zWm6BGxT/IMG-5301.jpg",
-      };
-    else if (quizResult.seat === "lounge")
-      persona = {
-        zh: "微醺引力點",
-        en: "THE MAGNET",
-        quote: "你就是夜晚的引力中心，吸引著頻率相同的靈魂。",
-        kw: "#交流 #吸引",
-        img: "https://i.ibb.co/S4tNyR2d/IMG-5303.jpg",
-      };
-    else if (quizResult.seat === "table")
-      persona = {
-        zh: "城市漫遊者",
-        en: "THE DRIFTER",
-        quote: "不被座位束縛，你的雷達隨時開啟，準備在人海中捕捉訊號。",
-        kw: "#流動 #觀察",
-        img: "https://i.ibb.co/0yNSCz9p/IMG-5300.jpg",
-      };
-    else if (quizResult.seat === "anywhere")
-      persona = {
-        zh: "頻率共振者",
-        en: "THE RESONATOR",
-        quote: "座位只是形式。只要音樂對了，整個空間都是你的主場。",
-        kw: "#直覺 #氛圍",
-        img: "https://i.ibb.co/5XZnpVbs/IMG-5299.jpg",
-      };
-  }
+  const resultSeat = quizResult?.seat || "default";
+  const persona = PERSONA_DATA[resultSeat] || PERSONA_DATA["default"];
 
   const downloadICSFile = () => {
     const start = new Date(`${data.date}T${data.time}`)
@@ -698,7 +721,6 @@ const SuccessPage = ({ data, quizResult, onReplay, onHome }) => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-start overflow-y-auto no-scrollbar pb-20 bg-black relative z-20">
-      {/* 視覺卡片：長圖海報，雜誌排版邏輯 */}
       <div className="w-full relative flex flex-col items-center justify-start shadow-2xl bg-[#0a0a0a]">
         <div className="w-full relative">
           <img
@@ -707,60 +729,57 @@ const SuccessPage = ({ data, quizResult, onReplay, onHome }) => {
             alt="Persona Poster"
           />
 
-          {/* 上層漸層輔助閱讀 (不遮擋主體) */}
+          {/* 上下漸層不擋主體 */}
           <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-black/60 to-transparent"></div>
-          {/* 下層漸層輔助閱讀 */}
           <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
 
-          {/* 頂部文字區 (Header)：關鍵字 + 標題組 */}
+          {/* 標題區 */}
           <div className="absolute inset-x-0 top-0 p-10 pt-16 text-center flex flex-col items-center z-30">
             <p className="text-[10px] text-amber-500 font-bold tracking-[0.5em] uppercase mb-4 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
               {persona.kw}
             </p>
             <div className="flex flex-col items-center gap-1 drop-shadow-[0_5px_15px_rgba(0,0,0,0.8)]">
-              <h2 className="text-4xl font-serif text-white tracking-[0.15em] font-bold uppercase leading-none">
+              <h2 className="text-4xl font-serif text-white tracking-[0.15em] font-bold uppercase">
                 {persona.zh}
               </h2>
-              <p className="text-[10px] text-white/70 font-mono tracking-[0.4em] uppercase italic">
+              <p className="text-[10px] text-white/60 font-mono tracking-[0.4em] uppercase italic">
                 {persona.en}
               </p>
             </div>
           </div>
 
-          {/* 底部文字區 (Footer)：語錄 */}
-          <div className="absolute inset-x-0 bottom-0 p-8 pt-20 text-center flex flex-col items-center z-30">
-            <p className="text-[#e5d5b0] font-serif italic text-sm leading-relaxed mb-12 max-w-xs drop-shadow-md">
+          {/* 語錄區 */}
+          <div className="absolute inset-x-0 bottom-0 p-10 pb-16 text-center flex flex-col items-center z-30">
+            <p className="text-[#e5d5b0] font-serif italic text-sm leading-relaxed mb-6 max-w-xs drop-shadow-md">
               "{persona.quote}"
             </p>
+          </div>
 
-            {/* IG 連結按鈕 (右下角) */}
-            <div className="absolute bottom-6 right-6 z-40">
-              <a
-                href={IG_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 shadow-2xl hover:bg-white/20 active:scale-95 transition-all"
-              >
-                <div className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center shadow-lg group-hover:bg-[#4a0404] group-hover:text-white transition-colors">
-                  <Instagram size={18} strokeWidth={2} />
-                </div>
-                <div className="flex flex-col text-left">
-                  <span className="text-[9px] text-white/70 font-mono tracking-wider">
-                    DM for Location
-                  </span>
-                  <span className="text-[8px] text-[#e5d5b0] font-bold uppercase tracking-widest">
-                    私訊索取地標
-                  </span>
-                </div>
-              </a>
-            </div>
+          {/* IG 私訊連結 */}
+          <div className="absolute bottom-6 right-6 z-40">
+            <a
+              href={IG_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-3 bg-white/5 backdrop-blur-2xl px-4 py-2 rounded-full border border-white/10 shadow-2xl hover:bg-white/10 active:scale-95 transition-all"
+            >
+              <div className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center shadow-lg group-hover:bg-[#4a0404] group-hover:text-white transition-colors">
+                <Instagram size={18} strokeWidth={2} />
+              </div>
+              <div className="flex flex-col text-left">
+                <span className="text-[9px] text-white/70 font-mono tracking-wider uppercase">
+                  DM for📍
+                </span>
+                <span className="text-[8px] text-[#e5d5b0] font-bold uppercase tracking-widest">
+                  私訊索取地標
+                </span>
+              </div>
+            </a>
           </div>
         </div>
       </div>
 
-      {/* 資訊與按鈕區 */}
-      <div className="w-full max-w-sm px-6 mt-8 space-y-4">
-        {/* 預約資訊 */}
+      <div className="w-full max-w-sm px-6 mt-10 space-y-4">
         <div className="bg-[#111] p-8 border border-[#222] rounded-[32px] text-sm shadow-xl relative group">
           <div className="absolute top-0 right-0 w-24 h-24 bg-[#4a0404]/5 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-all duration-1000"></div>
           <div className="flex justify-between border-b border-white/5 pb-4 mb-4 text-zinc-500 uppercase tracking-widest text-[10px] relative z-10 font-serif">
@@ -778,12 +797,11 @@ const SuccessPage = ({ data, quizResult, onReplay, onHome }) => {
           <div className="flex justify-between text-zinc-500 uppercase tracking-widest text-[10px] relative z-10 font-serif mt-2 border-t border-white/5 pt-2">
             <span>Host</span>
             <span className="text-[#a89f91]">
-              {data.host === "all" || !data.host ? "Any" : data.host}
+              {data.host === "all" || !data.host ? "不指定" : data.host}
             </span>
           </div>
         </div>
 
-        {/* 行事曆區塊 */}
         <div>
           <p className="text-zinc-600 text-[9px] uppercase tracking-[0.2em] mb-2 text-center font-bold">
             加入行事曆
@@ -808,7 +826,6 @@ const SuccessPage = ({ data, quizResult, onReplay, onHome }) => {
             </button>
           </div>
         </div>
-
         <div className="flex gap-3">
           <button
             onClick={onReplay}
@@ -824,8 +841,6 @@ const SuccessPage = ({ data, quizResult, onReplay, onHome }) => {
             Back to Entrance
           </Button>
         </div>
-
-        {/* 家規區塊 */}
         <div className="mt-12 border-t border-zinc-800 pt-10 pb-10">
           <h4 className="text-zinc-600 text-[10px] uppercase tracking-[0.4em] mb-8 text-center font-bold">
             House Rules
@@ -864,7 +879,7 @@ const SuccessPage = ({ data, quizResult, onReplay, onHome }) => {
   );
 };
 
-// --- Admin Panel (管理後台) - ★ 修正：極簡化結果顯示 ★ ---
+// --- Admin Panel (管理後台) ---
 const AdminPanel = ({
   reservations,
   availability,
@@ -904,6 +919,7 @@ const AdminPanel = ({
       </div>
     );
 
+  // 輔助函式：切換某個主理人在某天的某時段
   const toggleSlot = (date, hostId, slot) => {
     const dayData = availability[date] || {};
     let hostSlots = [];
@@ -968,11 +984,19 @@ const AdminPanel = ({
                 key={res.id}
                 className="p-6 bg-[#111] border border-[#222] rounded-2xl relative group hover:border-[#4a0404] transition-all"
               >
-                <div className="text-[#e5d5b0] font-bold text-lg font-serif mb-1">
-                  {res.name}{" "}
-                  <span className="text-zinc-500 text-[10px] ml-2">
-                    ({res.contact})
+                {/* ★ 修改：後台名字旁邊增加餐食標籤 ★ */}
+                <div className="text-[#e5d5b0] font-bold text-lg font-serif mb-1 flex items-center flex-wrap gap-2">
+                  <span>
+                    {res.name}{" "}
+                    <span className="text-zinc-500 text-[10px] ml-1">
+                      ({res.contact})
+                    </span>
                   </span>
+                  {res.needsFood && (
+                    <span className="text-[10px] bg-[#4a0404]/20 text-[#e5d5b0] border border-[#4a0404]/50 px-2 py-0.5 rounded uppercase tracking-widest">
+                      🍽️ 需供餐
+                    </span>
+                  )}
                 </div>
                 <div className="text-zinc-500 text-xs font-mono tracking-widest uppercase">
                   {res.date} {res.time} | {res.guests} PPL
@@ -985,7 +1009,7 @@ const AdminPanel = ({
                   </span>
                 </div>
 
-                {/* ★ 修正：極簡化結果顯示 (文字列表：rock / bar / excited / gimlet) ★ */}
+                {/* ★ 修正：極簡化結果顯示 (文字列表) ★ */}
                 {res.quizResult && res.quizResult.seat !== "default" ? (
                   <div className="mt-3 pt-2 border-t border-white/5 text-[10px] text-zinc-400 font-mono tracking-wide">
                     {res.quizResult.sound} / {res.quizResult.seat} /{" "}
@@ -1238,11 +1262,16 @@ export default function App() {
     }
   };
 
-  const handleUpdateAvailability = async (date, slots) => {
+  const handleUpdateAvailability = async (date, updatedDayData) => {
     if (!user || !db) return;
     const newAvail = { ...availability };
-    if (slots === null) delete newAvail[date];
-    else newAvail[date] = slots;
+
+    if (updatedDayData === null) {
+      delete newAvail[date];
+    } else {
+      newAvail[date] = updatedDayData;
+    }
+
     setAvailability(newAvail);
     try {
       await setDoc(
@@ -1255,8 +1284,7 @@ export default function App() {
           "thirty_settings",
           "calendar"
         ),
-        { dates: newAvail },
-        { merge: true }
+        { dates: newAvail }
       );
     } catch (e) {
       console.error(e);
